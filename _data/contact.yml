@@ -4,6 +4,14 @@
   icon: "fab fa-github"
   url: 'https://github.com/Chenpi-Sakura'
 
+- type: csdn
+  icon: "iconfont icon-csdn"
+  url: 'https://blog.csdn.net/chenpi_1'
+
+- type: bilibili
+  icon:  "iconfont icon-bilibili"
+  url: 'https://space.bilibili.com/456691168'
+
 # - type: twitter
 #   icon: "fa-brands fa-x-twitter"
 
