@@ -9,6 +9,8 @@ math: true
 mermaid: true
 ---
 
+> Link:[Nowcoder](https://ac.nowcoder.com/acm/contest/99909/)
+
 > 像这样要求我们查询某一个边/点是否存在于某条最短路上，此时我们一般采取双向找最短路的操作，只要满足 $dist(1,u)+dist(v,n)=dist(1,n)$ 即可确定是否在最短路上
 {: .prompt-tip }
 ## 题目描述

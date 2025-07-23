@@ -9,6 +9,8 @@ math: true
 mermaid: true
 ---
 
+> Link:[Nowcoder](https://ac.nowcoder.com/acm/contest/99909/)
+
 ## 题目描述
 
 小苯有一个果园，他在其中种了 $n$ 个果子，其中第 i 个果子的种类为 $a_i$​ 。

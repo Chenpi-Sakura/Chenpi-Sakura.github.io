@@ -9,6 +9,8 @@ math: true
 mermaid: true
 ---
 
+> Link:[Nowcoder](https://ac.nowcoder.com/acm/contest/99909/)
+
 ## 题目描述
 
 小苯有一个长度为 $n$ 的数组 $a$，其中第 $i$ 个数字的值为 $a_i$。

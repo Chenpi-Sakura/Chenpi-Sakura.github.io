@@ -9,6 +9,8 @@ math: true
 mermaid: true
 ---
 
+> Link:[Nowcoder](https://ac.nowcoder.com/acm/contest/99909/)
+
 ## 题目描述
 
 小苯和格格正在玩一款名为“吃糖果”的游戏，游戏的过程是这样的：
