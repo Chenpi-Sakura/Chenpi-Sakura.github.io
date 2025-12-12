@@ -21,7 +21,7 @@ jobs:
           
           # 2. 这里的地址换成你第一步在阿里云创建的地址
           # 格式: registry.地区.aliyuncs.com/命名空间/仓库名:标签
-          NEW_IMAGE="crpi-6qkcjqd0hucj649m.cn-hangzhou.personal.cr.aliyuncs.com/jekyll/jekyll-latest"
+          NEW_IMAGE="crpi-6qkcjqd0hucj649m.cn-hangzhou.personal.cr.aliyuncs.com/jeklly/jekyll-latest"
           
           # 3. 重新打标签
           docker tag mcr.microsoft.com/devcontainers/jekyll:2-bullseye $NEW_IMAGE
