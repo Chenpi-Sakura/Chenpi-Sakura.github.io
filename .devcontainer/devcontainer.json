@@ -25,9 +25,5 @@
         "mhutchie.git-graph"
       ]
     }
-  },
-  "containerEnv": {
-    "http_proxy": "http://host.docker.internal:7890",
-    "https_proxy": "http://host.docker.internal:7890"
   }
 }
