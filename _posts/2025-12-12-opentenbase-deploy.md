@@ -9,11 +9,13 @@ math: true
 mermaid: true
 ---
 
-> **适用范围**：本教程只适用于RedHat系列（CentOS、RockyLinux）
+> **适用范围**：本教程只适用于RedHat系列（CentOS、RockyLinux）\
 > **说明**：本文档演示单机集中式部署方案，适用于开发测试环境。
+
 ## 一、准备工作
 ### 1. 环境准备与依赖安装
 更新系统并安装编译所需的基础依赖库。
+
 ```bash
 # 更新系统及安装 EPEL 源
 sudo yum update -y
@@ -31,55 +33,68 @@ sudo yum -y install git sudo gcc make readline-devel zlib-devel openssl-devel uu
 ### 2. 修正库文件链接
 部分系统 libssh2 版本命名存在差异，需建立软链接以确保兼容性。
 创建一个软链接。
+
 ```bash
 sudo ln -s /usr/lib64/libssh2.so.1 /usr/lib64/libssh2.so
 ```
+
 检查是否存在libssh2.so
+
 ```bash
 ls /usr/lib64/libssh2.so*
 ```
 
 ### 3. 推荐的设置
 - 关闭SELinux
+
 ```bash
 sudo vim /etc/selinux/config
 
 # 将: SELINUX=enforcing 
 # 修改为: SELINUX=disabled
 ```
+
 - 禁用防火墙
+
 ```bash
 systemctl disable firewalld && systemctl stop firewalld
 ```
 
 ### 4. 创建用户
 1. 创建数据目录和数据库用户：
+
 ```bash
 sudo mkdir -p /data # 创建目录/data
 sudo useradd -d /data/opentenbase -s /bin/bash -m opentenbase # 创建用户
 sudo passwd opentenbase # 设置密码，若设置分布式需所有服务器的opentenbase用户密码保持一致
 ```
 
-2. 启用wheel group 的 sudo 权限
+1. 启用wheel group 的 sudo 权限
+
 ```bash
 sudo usermod -aG wheel opentenbase # 添加到 WheelGroup
 sudo visudo # 编辑 sudoers 文件，取消%wheel行的注释
 ```
+
 然后搜索wheel，可以看到%wheel开头的两条配置，分别去掉最左边的#，保存退出。
+
 ```bash
 # 取消这两行的注释
 %wheel  ALL=(ALL)       ALL 
 %wheel  ALL=(ALL)       NOPASSWD: ALL
 ```
 
-3. 切换用户
+1. 切换用户
+
 ```bash
 su - opentenbase
 ```
+
 ## 二、源码编译
 ~~(不想和各种依赖打架的可以直接跳至三、安装与部署)~~
 ### 1. 手动编译第三方依赖
 - ztsd
+
 ```bash
 git clone https://github.com/facebook/zstd.git
 cd zstd 
@@ -88,7 +103,9 @@ sudo make install
 cd ..
 
 ```
+
 - lz4
+
 ```bash
 git clone https://github.com/lz4/lz4.git
 cd lz4
@@ -97,7 +114,9 @@ sudo make install
 cd ..
 
 ```
+
 - uuid
+
 ```bash
 wget ftp://ftp.ossp.org/pkg/lib/uuid/uuid-1.6.2.tar.gz
 # 下载不了就使用镜像源
@@ -109,7 +128,9 @@ sudo make install
 cd ..
 
 ```
+
 - CLI11
+
 ```bash
 git clone https://github.com/CLIUtils/CLI11.git 
 mkdir -p CLI11/build && cd CLI11/build 
@@ -121,24 +142,28 @@ cd ..
 
 ```
 
-2. 清理临时文件
+1. 清理临时文件
+
 ```bash
 sudo rm -rf CLI11  lz4  uuid-1.6.2  uuid-1.6.2.tar.gz  zstd
 ```
 
 ### 2. 编译OpenTenBase源代码
 1. 获取OpenTenBase源代码
+
 ```bash
 git clone https://github.com/OpenTenBase/OpenTenBase
 ```
 
-2. 设置环境变量
+1. 设置环境变量
+
 ```bash
 export SOURCECODE_PATH=/data/opentenbase/OpenTenBase
 export INSTALL_PATH=/data/opentenbase/install/
 ```
 
-3. 编译
+1. 编译
+
 ```bash
 # 进入源代码目录
 cd ${SOURCECODE_PATH}
@@ -162,6 +187,7 @@ make install
 
 ## 三、安装与部署
 ### 1. 设置环境变量
+
 ```bash
 export SOURCECODE_PATH=/data/opentenbase/OpenTenBase
 export INSTALL_PATH=/data/opentenbase/install/
@@ -170,25 +196,33 @@ export PATH="$PATH:$PG_HOME/bin"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PG_HOME/lib"
 export LC_ALL=C
 ```
+
 ### 2. 准备安装包与工具
 #### 分支A: 如果未进行源码编译
 1. 下载opentenbase_ctl工具与二进制包
+
 ```bash
 cd ${INSTALL_PATH}
 wget https://github.com/Chenpi-Sakura/OpenTenBase/releases/download/v5.0/opentenbase_ctl
 wget https://github.com/Chenpi-Sakura/OpenTenBase/releases/download/v5.0/opentenbase-5.21.8-i.x86_64.tar.gz
 ```
-2. 赋予工具执行权限
+
+1. 赋予工具执行权限
+
 ```bash
 chmod +x opentenbase_ctl
 ```
+
 #### 分支B: 如果进行了源码编译
 1. 获取部署工具opentenbase_ctl
+
 ```bash
 cd ${INSTALL_PATH}
 cp ${PG_HOME}/bin/opentenbase_ctl .
 ```
-2. 将编译好的目录打包
+
+1. 将编译好的目录打包
+
 ```bash
 cd ${PG_HOME} 
 tar -zcf ../opentenbase-5.21.8-i.x86_64.tar.gz *
@@ -197,12 +231,16 @@ tar -zcf ../opentenbase-5.21.8-i.x86_64.tar.gz *
 ---
 
 ### 3. 准备好部署的配置文件
+
 ```bash
 touch postgres.conf
 touch config.ini
 ```
+
 >postgres.conf:用户自定义配置项，如果你想节点初始化后替换某个guc配置项，可以将该配置写在这个文件中。如果没有特别的自定义配置，直接使用工具自动配置的GUC，那么这个文件为空即可。
+
 ### 4. 修改config.ini内容
+
 ```bash
 vim config.ini
 ```
@@ -237,6 +275,7 @@ level=DEBUG
 
 ### 5. 检查文件是否存在
 检查config.ini，postgres.conf，opentenbase-5.21.8-i.x86_64.tar.gz，opentenbase_ctl是否都存在
+
 ```bash
 [opentenbase@sc install]$ ls -l 
 total 40812
@@ -248,10 +287,13 @@ drwxrwxr-x. 6 opentenbase opentenbase       56 Nov 17 20:13 opentenbase_bin_v5.0
 ```
 
 ### 6. 开始部署
+
 ```bash
 ./opentenbase_ctl install -c config.ini
 ```
- 部署过程
+
+部署过程
+
 ```bash
  ====== Start to Install  instance opentenbase_c  ====== 
 
@@ -277,10 +319,13 @@ step 5:Create node group ...
 ```
 
 ### 7. 检查
+
 ```bash
 ./opentenbase_ctl status
 ```
+
 此时的结果应当为...
+
 ```bash
  ------------- Instance status -----------  
 Instance name: opentenbase_c
@@ -294,10 +339,12 @@ Node dn0001(10.34.159.220:11000) is Running
 Environment variable: export LD_LIBRARY_PATH=/data/opentenbase/install/opentenbase/5.21.8/lib  && export PATH=/data/opentenbase/install/opentenbase/5.21.8/bin:${PATH} 
 PSQL connection: psql -h 10.34.159.220 -p 11000 -U opentenbase postgres
 ```
+
 **无报错，恭喜你部署成功！**
 
 还可以验证一下：
 复制并粘贴Environment variable环境变量和PSQL connection后面的内容
+
 ```bash
 [opentenbase@sc install]$ export LD_LIBRARY_PATH=/data/opentenbase/install/opentenbase/5.21.8/lib  && export PATH=/data/opentenbase/install/opentenbase/5.21.8/bin:${PATH} 
 [opentenbase@sc install]$ psql -h 10.34.159.220 -p 11000 -U opentenbase postgres
@@ -321,6 +368,7 @@ postgres=# \dt
 
 2. 查看工具支持的功能，可以执行命令 `./opentenbase_ctl -h `来看详细支持的功能。
 - 查看支持的基本功能
+
 ``` bash
 [opentenbase@sc install]$ ./opentenbase_ctl -h
 Opentenbase cluster management tool 
@@ -342,7 +390,9 @@ SUBCOMMANDS:
   expand                      Expand a Opentenbase cluster 
   shrink                      Shrink a Opentenbase cluster 
 ```
+
 - 查看具体某个功能（比如 stop）的命令参数： 
+
 ``` bash
 [opentenbase@sc install]$ ./opentenbase_ctl stop -h
 Stop a Opentenbase cluster 
@@ -364,6 +414,9 @@ OPTIONS:
           --ssh-port TEXT     SSH port 
 ```
 
+---
+
 参考资料
 [OpenTenBase/README_ZH.md](https://github.com/OpenTenBase/OpenTenBase/blob/master/README_ZH.md)
 [快速入门 - OpenTenBase Documentation](https://docs.opentenbase.org/guide/01-quickstart/)
+[opentenbase_ctl](https://github.com/OpenTenBase/OpenTenBase/tree/master/contrib/opentenbase_ctl)
