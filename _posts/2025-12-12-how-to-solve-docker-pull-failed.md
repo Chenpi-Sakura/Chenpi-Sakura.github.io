@@ -53,71 +53,61 @@ mermaid: true
 1. 登录 [阿里云容器镜像服务控制台](https://cr.console.aliyun.com/)。
 2. 创建个人实例（免费）。
 3. 设置 Registry 登录密码：**注意这不是阿里云的登录密码，是专门给 Docker 用的固定密码。**
-4. 创建命名空间（例如 `myblog`）和镜像仓库（例如 `jekyll-mirror`）。
+4. 创建命名空间（例如 `saku`）和镜像仓库（例如 `jekyll-mirror`）。
 5. 可选：把仓库类型设置为**公开 (Public)**。这样本地拉取时不需要配置 Docker Login，非常方便。
 
-### 第二步：配置 GitHub Actions
+### 第二步：配置 GitHub Actions 和 GitHub Secrets
 
-在你的 GitHub 仓库中，创建文件 `.github/workflows/docker-sync.yml`：
+首先fork这个项目[docker_sync](https://github.com/Chenpi-Sakura/docker_sync)，相关的`Action`代码可以参考项目`.github\workflows`目录下的yml文件
 
->这里我们以拉取镜像`mcr.microsoft.com/devcontainers/jekyll:2-bullseye`\
->阿里云镜像服务中的仓库命名`myblog/jekyll-mirror`为例
+然后按照顺序点击 `Settings` -> `Secrets and variables` -> `Actions`->`New repository secret`
 
-```yaml
-name: Mirror Docker Image to Aliyun # Action的名字
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-1.png)
 
-on:
-  workflow_dispatch: # 允许手动点击按钮触发
+>这里我们以拉取镜像`mcr.microsoft.com/devcontainers/jekyll:2-bullseye`和命名空间`saku`为例
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Login to Aliyun Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: crpi-xxxx.cn-hangzhou.personal.cr.aliyuncs.com # 注意：这里要填你个人实例的【专属地址】，详细参考镜像的仓库信息中的公网地址
-          username: ${{ secrets.ALIYUN_USERNAME }}
-          password: ${{ secrets.ALIYUN_PASSWORD }}
-
-      - name: Pull and Push Image
-        run: |
-          # 1. 拉取原始镜像
-          docker pull mcr.microsoft.com/devcontainers/jekyll:2-bullseye
-          
-          # 2. 重新打标签为阿里云地址
-          # 格式: 你的专属域名/命名空间/仓库名:标签
-          NEW_IMAGE="crpi-xxxx.cn-hangzhou.personal.cr.aliyuncs.com/myblog/jekyll-mirror"
-          
-          docker tag mcr.microsoft.com/devcontainers/jekyll:2-bullseye $NEW_IMAGE
-          
-          # 3. 推送到阿里云
-          docker push $NEW_IMAGE
-```
-
-### 第三步：配置 GitHub Secrets
-
-为了安全起见，不要把密码直接写在代码里。在仓库的 Settings -> Secrets and variables -> Actions 中添加：
+需要设置以下参数
 
 * `ALIYUN_USERNAME`: 你的阿里云 UserID。
 * `ALIYUN_PASSWORD`: 第一步里设置的 Registry 独立密码。
+* `ALIYUN_NAMESPACE`: 第一步中设置的命名空间
+* `ALIYUN_REGISTRY`: 控制台概览中的公网域名
 
-配置完成后，去 GitHub 仓库的 **Actions** 页面，选中 Mirror Docker Image to Aliyun，点击 **Run workflow**。等待几十秒，看到绿色 ✅ 即表示搬运成功。
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-2.png)
+
+填写后点击`Add secret`按照下图添加，添加以上四个Secret。
+
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-3.png)
+
+配置完成后，去 GitHub 仓库的 `Actions` 页面，选中 `Mirror Docker Image to Aliyun`，点击 `Run workflow`，填写相关配置，再点击`Run workflow`。
+
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-4.png)
+
+等待拉取完毕，
+
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-5.png)
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-6.png)
+
+此时`Action`界面显示成功，控制台中也出现了相应的仓库
 
 ### 第四步：修改本地配置
 
-回到本地项目，相应地修改 `.devcontainer/devcontainer.json`：
+回到本地项目，相应地修改 `.devcontainer/devcontainer.json` 中的image地址：
 
 ```json
-"image": "crpi-xxxx.cn-hangzhou.personal.cr.aliyuncs.com/myblog/jekyll-mirror:latest",
+"image": "crpi-xxxx.cn-hangzhou.personal.cr.aliyuncs.com/myblog/jekyll-mirror:latest"
 ```
+
+> 地址位置参考仓库基本信息的公网地址
+
+![](https://caipiischenpi.dpdns.org/PicGo/docker-sync-7.png)
 
 此时重新拉取镜像，一下就成功了...
 
 >如果拉取失败，可能是权限的问题，详细参考仓库信息中的操作指南
 
 ## 总结
-通过这个方法，我们实际上是利用 GitHub Actions 搭建了一个**“私人的 Docker 镜像加速通道”**。
+通过这个方法，我们实际上是利用 GitHub Actions 搭建了一个 **“私人的 Docker 镜像加速通道”**。
 
 这个方案需要自己手动配置一次 Workflow，且阿里云个人版有配额限制，但也算是无可奈何中的解决方案了吧。
 
