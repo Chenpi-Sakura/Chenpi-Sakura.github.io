@@ -2,7 +2,7 @@
 title: MySQL 在单一表格中获取数据
 autor: Chenpi
 date: 2025-06-15 21:42:00 +0800
-categories: [笔记, 数据库]
+categories: [数据库, 笔记]
 tags: [数据库, 笔记]
 
 math: true

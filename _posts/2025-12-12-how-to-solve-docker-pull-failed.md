@@ -90,7 +90,7 @@ mermaid: true
 
 此时`Action`界面显示成功，控制台中也出现了相应的仓库
 
-### 第四步：修改本地配置
+### 第三步：修改本地配置
 
 回到本地项目，相应地修改 `.devcontainer/devcontainer.json` 中的image地址：
 
